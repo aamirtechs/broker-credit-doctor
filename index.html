@@ -529,6 +529,12 @@ Math.floor((asOf.t - inv.dueAt.t) / DAY) > 0;
 });
 var overdueAmount = Dec(0);
 overdue.forEach(function (inv) { if (inv.amount !== null) overdueAmount = decAdd(overdueAmount, inv.amount); });
+var oldest = null;
+overdue.forEach(function (inv) { if (oldest === null || inv.dueAt.t < oldest.dueAt.t) oldest = inv; });
+var oldestOverdue = oldest === null ? null : {
+id: oldest.id, broker: oldest.broker || "(no broker)", dueAt: oldest.dueAt,
+days: Math.floor((asOf.t - oldest.dueAt.t) / DAY), amount: oldest.amount
+};
 var dtpValues = [];
 live.forEach(function (inv) {
 var v = daysToPay(inv, asOf);
@@ -549,7 +555,7 @@ invoices: invoices.length, voidCount: invoices.length - live.length,
 findings: findings.length, errors: errors, warnings: warnings,
 totalInvoiced: totalInvoiced, totalPaid: totalPaid,
 outstanding: decSub(totalInvoiced, totalPaid),
-overdue: overdue.length, overdueAmount: overdueAmount,
+overdue: overdue.length, overdueAmount: overdueAmount, oldestOverdue: oldestOverdue,
 avgDtp: dtpValues.length ? pyRound(dtpValues.reduce(function (a, b) { return a + b; }, 0) / dtpValues.length, 1) : null,
 onTimeRate: dtpValues.length ? pyRound(100.0 * onTime / dtpValues.length, 1) : null,
 perBroker: perBroker
@@ -564,6 +570,11 @@ if (summary.voidCount) lines.push("Void invoices: " + summary.voidCount + " (exc
 lines.push("Total invoiced: " + money(summary.totalInvoiced) + ", total paid: " +
 money(summary.totalPaid) + ", outstanding: " + money(summary.outstanding));
 lines.push("Overdue: " + summary.overdue + " invoices, " + money(summary.overdueAmount));
+if (summary.oldestOverdue !== null) {
+var oldest = summary.oldestOverdue;
+lines.push("Oldest overdue: " + oldest.id + ", " + oldest.broker + ", due " + fmtD(oldest.dueAt) + ", " +
+oldest.days + " days overdue, " + (oldest.amount !== null ? money(oldest.amount) : "no valid amount"));
+}
 lines.push(summary.avgDtp === null ? "Average days to pay: none" :
 "Average days to pay: " + fmtF(summary.avgDtp, 1));
 lines.push(summary.onTimeRate === null ? "On-time payment rate: none" :

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+* The text summary names the single oldest overdue invoice
+  (invoice id, broker, due date, days overdue, and amount)
+  right after the overdue totals, so the worst case can be
+  chased first. The line is left out when nothing is
+  overdue, and the JSON output is unchanged. The web demo
+  prints the same line.
+
 ## 1.0.0 - 2026-11-18
 
 Initial release.

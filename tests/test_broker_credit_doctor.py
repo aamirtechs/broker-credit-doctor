@@ -423,6 +423,49 @@ class TestRender(unittest.TestCase):
         self.assertIn("On-time payment rate: 57.1%", text)
         self.assertIn("Per-broker summary:", text)
 
+    def test_text_names_oldest_overdue(self):
+        path = os.path.join(EXAMPLES, "invoices.csv")
+        invoices, findings = bcd.parse_csv(path, AS_OF)
+        findings.extend(bcd.audit(invoices, AS_OF))
+        summary = bcd.summarize(invoices, findings, AS_OF)
+        text = bcd.render_text(invoices, findings, summary)
+        self.assertIn("Oldest overdue: INV-104, Beta Freight, due "
+                      "2026-08-01, 109 days overdue, $4,100.00\n",
+                      text)
+        self.assertEqual(text.count("Oldest overdue:"), 1)
+
+    def test_clean_text_has_no_oldest_overdue(self):
+        path = os.path.join(EXAMPLES, "clean.csv")
+        invoices, findings = bcd.parse_csv(path, AS_OF)
+        findings.extend(bcd.audit(invoices, AS_OF))
+        summary = bcd.summarize(invoices, findings, AS_OF)
+        self.assertIsNone(summary["oldest_overdue"])
+        self.assertNotIn("Oldest overdue",
+                         bcd.render_text(invoices, findings, summary))
+
+    def test_oldest_overdue_without_valid_amount(self):
+        content = HEADER + row("INV-1", broker="", amount="lots",
+                               due="2026-10-02", paid="",
+                               status="unpaid", terms="") \
+            + row("INV-2", due="2026-11-01", paid="",
+                  status="unpaid", terms="")
+        invoices, findings = audit(content)
+        summary = bcd.summarize(invoices, findings, AS_OF)
+        text = bcd.render_text(invoices, findings, summary)
+        self.assertIn("Oldest overdue: INV-1, (no broker), due "
+                      "2026-10-02, 47 days overdue, no valid amount",
+                      text)
+
+    def test_json_has_no_oldest_overdue(self):
+        path = os.path.join(EXAMPLES, "invoices.csv")
+        invoices, findings = bcd.parse_csv(path, AS_OF)
+        findings.extend(bcd.audit(invoices, AS_OF))
+        summary = bcd.summarize(invoices, findings, AS_OF)
+        report = json.loads(bcd.render_json(invoices, findings,
+                                            summary))
+        self.assertNotIn("oldest_overdue", report)
+        self.assertIn("oldest_overdue", summary)
+
     def test_json_is_valid(self):
         path = os.path.join(EXAMPLES, "invoices.csv")
         invoices, findings = bcd.parse_csv(path, AS_OF)
