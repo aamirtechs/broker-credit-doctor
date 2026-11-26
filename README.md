@@ -139,10 +139,13 @@ Warnings, patterns worth investigating:
 
 The summary reports the total invoiced, total paid, and
 outstanding amounts with Decimal cents math, the overdue
-invoice count and amount, the average days to pay, the
-on-time payment rate, and a per-broker table with invoice
-count, invoiced and paid amounts, average days to pay,
-overdue count, and revenue share.
+invoice count and amount, the single oldest overdue
+invoice (invoice id, broker, due date, days overdue, and
+amount, so the worst case can be chased first; the line is
+left out when nothing is overdue), the average days to
+pay, the on-time payment rate, and a per-broker table with
+invoice count, invoiced and paid amounts, average days to
+pay, overdue count, and revenue share.
 
 ## Usage
 
@@ -180,6 +183,7 @@ ERROR [concentration-risk] Acme Logistics: broker carries 32.8% of all invoiced 
 Invoices: 18, findings: 23, errors: 15, warnings: 8
 Total invoiced: $35,350.00, total paid: $20,650.00, outstanding: $14,700.00
 Overdue: 4 invoices, $7,300.00
+Oldest overdue: INV-104, Beta Freight, due 2026-08-01, 109 days overdue, $4,100.00
 Average days to pay: 36.9
 On-time payment rate: 57.1%
 
@@ -300,16 +304,17 @@ cents exact), and `--out` writes the report to a file.
 python3 -m unittest discover -s tests -v
 ```
 
-68 tests, all passing: amount and terms parsing, timestamp
+72 tests, all passing: amount and terms parsing, timestamp
 parsing, header aliases and BOM handling, malformed rows,
 duplicate ids, invalid and future timestamps, due date
 computation from terms, overdue and writeoff rules, paid
 late rules, days-to-pay math, MC number rules and the
 double brokering signal, slow-pay and concentration rules
 with their minimum-count gates, void invoice handling,
-summary counts and money totals, per-broker tables, text
-and JSON output, and `--check` and `--strict` exit codes.
-The same 68 tests pass under pytest.
+summary counts and money totals, per-broker tables, the
+oldest overdue invoice line, text and JSON output, and
+`--check` and `--strict` exit codes. The same 72 tests
+pass under pytest.
 
 ## License
 
