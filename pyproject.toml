@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "broker-credit-doctor"
+version = "1.0.0"
+description = "Audit a broker payment history CSV export for slow pay, overdue invoices, and concentration risk"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+
+[project.scripts]
+broker-credit-doctor = "broker_credit_doctor:main_entry"
+
+[tool.setuptools]
+py-modules = ["broker_credit_doctor"]

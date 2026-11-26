@@ -1,0 +1,3 @@
+id,broker,broker_mc,delivered_at,invoiced_at,amount,terms_days,due_at,paid_at,status
+INV-301,Acme Logistics,123456,2026-10-01,2026-10-02,2500.00,30,2026-11-01,2026-11-03,paid
+INV-302,Beta Freight,,2026-10-05,2026-10-06,1800.00,60,2026-12-05,,unpaid

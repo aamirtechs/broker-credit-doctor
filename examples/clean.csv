@@ -1,0 +1,5 @@
+id,broker,broker_mc,delivered_at,invoiced_at,amount,terms_days,due_at,paid_at,status
+INV-201,Acme Logistics,123456,2026-10-01,2026-10-02,2000.00,30,2026-11-01,2026-10-28,paid
+INV-202,Beta Freight,234567,2026-10-05,2026-10-06,2000.00,60,2026-12-05,,unpaid
+INV-203,Gamma Transport,345678,2026-10-10,2026-10-11,2000.00,30,2026-11-10,2026-11-09,paid
+INV-204,Delta Carriers,456789,2026-10-15,2026-10-16,2000.00,30,2026-11-15,2026-11-12,paid
