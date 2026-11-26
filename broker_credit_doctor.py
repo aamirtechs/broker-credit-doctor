@@ -537,6 +537,17 @@ def summarize(invoices, findings, as_of,
     overdue_amount = sum(
         (invoice["amount"] for invoice in overdue
          if invoice["amount"] is not None), Decimal("0"))
+    oldest = None
+    for invoice in overdue:
+        if oldest is None or invoice["due_at"] < oldest["due_at"]:
+            oldest = invoice
+    oldest_overdue = None
+    if oldest is not None:
+        oldest_overdue = {"id": oldest["id"],
+                          "broker": oldest["broker"] or "(no broker)",
+                          "due_at": oldest["due_at"],
+                          "days": (as_of - oldest["due_at"]).days,
+                          "amount": oldest["amount"]}
     dtp_values = [days_to_pay(invoice, as_of) for invoice in live]
     dtp_values = [value for value in dtp_values if value is not None]
     on_time = 0
@@ -560,6 +571,7 @@ def summarize(invoices, findings, as_of,
             "outstanding": total_invoiced - total_paid,
             "overdue": len(overdue),
             "overdue_amount": overdue_amount,
+            "oldest_overdue": oldest_overdue,
             "avg_dtp": round(sum(dtp_values) / len(dtp_values), 1)
             if dtp_values else None,
             "on_time_rate": round(100.0 * on_time / len(dtp_values), 1)
@@ -584,6 +596,15 @@ def render_text(invoices, findings, summary):
     lines.append("Overdue: %(overdue)d invoices, %(overdue_amount)s"
                  % {"overdue": summary["overdue"],
                     "overdue_amount": money(summary["overdue_amount"])})
+    oldest = summary["oldest_overdue"]
+    if oldest is not None:
+        lines.append("Oldest overdue: %s, %s, due %s, %d days overdue, %s"
+                     % (oldest["id"], oldest["broker"],
+                        oldest["due_at"].strftime("%Y-%m-%d"),
+                        oldest["days"],
+                        money(oldest["amount"])
+                        if oldest["amount"] is not None
+                        else "no valid amount"))
     if summary["avg_dtp"] is None:
         lines.append("Average days to pay: none")
     else:
@@ -615,6 +636,7 @@ def render_text(invoices, findings, summary):
 def render_json(invoices, findings, summary):
     """Render the JSON report."""
     report = dict(summary)
+    del report["oldest_overdue"]
     report["total_invoiced"] = str(summary["total_invoiced"])
     report["total_paid"] = str(summary["total_paid"])
     report["outstanding"] = str(summary["outstanding"])
